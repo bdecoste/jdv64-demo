@@ -710,84 +710,6 @@
             }
         },
         {
-            "kind": "ImageStream",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            }
-        },
-        {
-            "kind": "BuildConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}",
-                "labels": {
-                    "application": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "source": {
-                    "type": "Git",
-                    "git": {
-                        "uri": "${SOURCE_REPOSITORY_URL}",
-                        "ref": "${SOURCE_REPOSITORY_REF}"
-                    },
-                    "contextDir": "${CONTEXT_DIR}"
-                },
-                "strategy": {
-                    "type": "Source",
-                    "sourceStrategy": {
-                        "forcePull": true,
-                        "from": {
-                            "kind": "ImageStreamTag",
-                            "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-datavirt64-openshift:6.4.0"
-                        },
-                        "env": [
-                            {
-                                "name": "CUSTOM_INSTALL_DIRECTORIES",
-                                "value": "extensions/*"
-                            },
-                            {
-                                "name": "VPG_DIRS",
-                                "value": "${VPG_DIRS}"
-                            }
-                        ]
-                    }
-                },
-                "output": {
-                    "to": {
-                        "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
-                    }
-                },
-                "triggers": [
-                    {
-                        "type": "GitHub",
-                        "github": {
-                            "secret": "${GITHUB_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "Generic",
-                        "generic": {
-                            "secret": "${GENERIC_WEBHOOK_SECRET}"
-                        }
-                    },
-                    {
-                        "type": "ImageChange",
-                        "imageChange": {}
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ]
-            }
-        },
-        {
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
@@ -810,8 +732,9 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "${APPLICATION_NAME}:latest"
-                            }
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "jboss-datavirt64-openshift:6.4.0"
+                             }
                         }
                     },
                     {
@@ -839,11 +762,6 @@
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
                                 "volumeMounts": [
-                                    {
-                                        "name": "configuration",
-                                        "mountPath": "/etc/datavirt-environment",
-                                        "readOnly": true
-                                    },
                                     {
                                         "name": "datavirt-keystore-volume",
                                         "mountPath": "/etc/datavirt-secret-volume",
@@ -1069,7 +987,7 @@
                                     },
                                     {
                                         "name": "ENV_FILES",
-                                        "value": "/etc/datavirt-environment/*,/etc/jdv-extensions/datasources.properties"
+                                        "value": "/etc/jdv-extensions/datasources.properties"
                                     },
                                     {
                                         "name": "DATAVIRT_TRANSPORT_KEYSTORE",
@@ -1187,12 +1105,6 @@
                             }
                         ],
                         "volumes": [
-                            {
-                                "name": "configuration",
-                                "secret": {
-                                    "secretName": "${CONFIGURATION_NAME}"
-                                }
-                            },
                             {
                                 "name": "datavirt-keystore-volume",
                                 "secret": {
