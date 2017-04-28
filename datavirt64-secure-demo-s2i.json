@@ -1,0 +1,1489 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "annotations": {
+            "iconClass": "icon-jboss",
+            "description": "Application template for JBoss Data Virtualization 6.3 services built using S2I.  Includes ability to configure certificates for serving secure content.",
+            "tags": "jdv,datavirt,jboss,xpaas",
+            "version": "1.4.0"
+        },
+        "name": "datavirt63-secure-s2i"
+    },
+    "labels": {
+        "template": "datavirt63-secure-s2i",
+        "xpaas": "1.4.0"
+    },
+    "message": "A new data service has been created in your project.  The username/password for accessing the service is ${TEIID_USERNAME}/${TEIID_PASSWORD}.  Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${CONFIGURATION_NAME}\" containing the datasource configuration details required by the deployed VPG(s); \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
+    "parameters": [
+        {
+            "description": "The name for the application.",
+            "displayName": "Application Name",
+            "name": "APPLICATION_NAME",
+            "value": "datavirt-app",
+            "required": true
+        },
+        {
+            "description": "The name of the secret containing configuration properties for the data sources.",
+            "displayName": "Configuration Secret Name",
+            "name": "CONFIGURATION_NAME",
+            "value": "datavirt-app-config",
+            "required": true
+        },
+        {
+            "description": "Specify a custom hostname for the http route.  Leave blank to use default hostname, e.g.: <service-name>-<project>.<default-domain-suffix>",
+            "displayName": "Custom http Route Hostname",
+            "name": "HOSTNAME_HTTP",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Specify a custom hostname for the https route.  Leave blank to use default hostname, e.g.: secure-<service-name>-<project>.<default-domain-suffix>",
+            "displayName": "Custom https Route Hostname",
+            "name": "HOSTNAME_HTTPS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Specify a custom hostname for the JPGC route.  Leave blank to use default hostname, e.g.: secure-<service-name>-<project>.<default-domain-suffix>",
+            "displayName": "Custom JPGC Route Hostname",
+            "name": "HOSTNAME_JPGC",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The URL of the repository with your application source code.",
+            "displayName": "Git Repository URL",
+            "name": "SOURCE_REPOSITORY_URL",
+            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
+            "required": true
+        },
+        {
+            "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
+            "displayName": "Git Reference",
+            "name": "SOURCE_REPOSITORY_REF",
+            "value": "master",
+            "required": false
+        },
+        {
+            "description": "Set this to the relative path to your project if it is not in the root of your repository.",
+            "displayName": "Context Directory",
+            "name": "CONTEXT_DIR",
+            "value": "datavirt/dynamicvdb-datafederation/app",
+            "required": false
+        },
+        {
+            "description": "The name of the service account to use for the deployment.  The service account should be configured to allow usage of the secret(s) specified by CONFIGURATION_NAME, HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
+            "name": "SERVICE_ACCOUNT_NAME",
+            "value": "datavirt-service-account",
+            "required": true
+        },
+        {
+            "description": "The name of the secret containing the keystore to be used for serving secure content.",
+            "displayName": "Server Keystore Secret Name",
+            "name": "HTTPS_SECRET",
+            "value": "datavirt-app-secret",
+            "required": true
+        },
+        {
+            "description": "The name of the keystore file within the secret.",
+            "displayName": "Server Keystore Filename",
+            "name": "HTTPS_KEYSTORE",
+            "value": "keystore.jks",
+            "required": false
+        },
+        {
+            "description": "The type of the keystore file (JKS or JCEKS).",
+            "displayName": "Server Keystore Type",
+            "name": "HTTPS_KEYSTORE_TYPE",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The name associated with the server certificate.",
+            "displayName": "Server Certificate Name",
+            "name": "HTTPS_NAME",
+            "value": "jboss",
+            "required": false
+        },
+        {
+            "description": "The password for the keystore and certificate",
+            "displayName": "Server Keystore Password",
+            "name": "HTTPS_PASSWORD",
+            "value": "mykeystorepass",
+            "required": false
+        },
+        {
+            "description": "Username associated with Teiid data service.",
+            "displayName": "Teiid Username",
+            "name": "TEIID_USERNAME",
+            "from": "[\\a]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Password for Teiid user.",
+            "displayName": "Teiid User Password",
+            "name": "TEIID_PASSWORD",
+            "from": "[\\a\\A]{8}[\\d]{1}[\\A]{1}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Username associated with ModeShape.",
+            "displayName": "ModeShape Username",
+            "name": "MODESHAPE_USERNAME",
+            "from": "[\\a]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Password for ModeShape user.",
+            "displayName": "ModeShape User Password",
+            "name": "MODESHAPE_PASSWORD",
+            "from": "[\\a\\A]{8}[\\d]{1}[\\A]{1}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "A secret string used to configure the GitHub webhook.",
+            "displayName": "Github Webhook Secret",
+            "name": "GITHUB_WEBHOOK_SECRET",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "A secret string used to configure the Generic webhook.",
+            "displayName": "Generic Webhook Secret",
+            "name": "GENERIC_WEBHOOK_SECRET",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+            "displayName": "ImageStream Namespace",
+            "name": "IMAGE_STREAM_NAMESPACE",
+            "value": "openshift",
+            "required": true
+        },
+        {
+            "description": "The name of the secret containing the keystore to be used for securing JGroups communications.",
+            "displayName": "JGroups Secret Name",
+            "name": "JGROUPS_ENCRYPT_SECRET",
+            "value": "datavirt-app-secret",
+            "required": false
+        },
+        {
+            "description": "The name of the keystore file within the JGroups secret.",
+            "displayName": "JGroups Keystore Filename",
+            "name": "JGROUPS_ENCRYPT_KEYSTORE",
+            "value": "jgroups.jceks",
+            "required": false
+        },
+        {
+            "description": "The name associated with the JGroups server certificate",
+            "displayName": "JGroups Certificate Name",
+            "name": "JGROUPS_ENCRYPT_NAME",
+            "value": "secret-key",
+            "required": false
+        },
+        {
+            "description": "The password for the keystore and certificate",
+            "displayName": "JGroups Keystore Password",
+            "name": "JGROUPS_ENCRYPT_PASSWORD",
+            "value": "password",
+            "required": false
+        },
+        {
+            "description": "Password used by JGroups to authenticate nodes in the cluster.",
+            "displayName": "JGroups Cluster Password",
+            "name": "JGROUPS_CLUSTER_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Controls whether exploded deployment content should be automatically deployed",
+            "displayName": "Deploy Exploded Archives",
+            "name": "AUTO_DEPLOY_EXPLODED",
+            "value": "false",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of source directories containing VPGs for deployment",
+            "displayName": "VPG Deployment Directories",
+            "name": "VPG_DIRS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The URL for the SSO server (e.g. https://secure-sso-myproject.example.com/auth).  This is the URL through which the user will be redirected when a login or token is required by the application.",
+            "displayName": "SSO Server URL",
+            "name": "SSO_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The URL for the interal SSO service, where secure-sso is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
+            "displayName": "SSO Server Service URL",
+            "name": "SSO_SERVICE_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The SSO realm to which the application client(s) should be associated (e.g. demo).",
+            "displayName": "SSO Realm",
+            "name": "SSO_REALM",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The username used to access the SSO service.  This is used to create the appliction client(s) within the specified SSO realm. This should match the SSO_SERVICE_USERNAME specified through one of the sso70-* templates.",
+            "displayName": "SSO Username",
+            "name": "SSO_USERNAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the SSO service user.",
+            "displayName": "SSO User's Password",
+            "name": "SSO_PASSWORD",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "SSO Realm Public Key. Public key is recommended to be passed into the template to avoid man-in-the-middle security vulnerability.  This can be retrieved from the SSO server, for the specified realm.",
+            "displayName": "SSO Realm Public Key",
+            "name": "SSO_PUBLIC_KEY",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "SSO Client Access Type. true or false",
+            "displayName": "SSO Bearer Only",
+            "name": "SSO_BEARER_ONLY",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The name of the secret containing the keystore file",
+            "displayName": "SSO SAML Keystore Secret",
+            "name": "SSO_SAML_KEYSTORE_SECRET",
+            "value": "eap-app-secret",
+            "required": false
+        },
+        {
+            "description": "The name of the keystore file within the secret",
+            "displayName": "SSO SAML Keystore File",
+            "name": "SSO_SAML_KEYSTORE",
+            "value": "keystore.jks",
+            "required": false
+        },
+        {
+            "description": "The name associated with the server certificate",
+            "displayName": "SSO SAML Certificate Alias",
+            "name": "SSO_SAML_CERTIFICATE_NAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the keystore and certificate",
+            "name": "SSO_SAML_KEYSTORE_PASSWORD",
+            "displayName": "SSO SAML Keystore Password",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The SSO Client Secret for Confidential Access",
+            "name": "SSO_SECRET",
+            "displayName": "SSO Client Secret",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": false
+        },
+        {
+            "description": "Enable CORS for SSO applications. true or false",
+            "name": "SSO_ENABLE_CORS",
+            "displayName": "SSO Enable CORS",
+            "value": "false",
+            "required": false
+        },
+        {
+            "description": "SSO logout page for SAML applications",
+            "name": "SSO_SAML_LOGOUT_PAGE",
+            "displayName": "SSO SAML Logout Page",
+            "value": "/",
+            "required": false
+        },
+        {
+            "description": "If true SSL communication between EAP and the SSO Server will be insecure (i.e. certificate validation is disabled with curl)",
+            "name": "SSO_DISABLE_SSL_CERTIFICATE_VALIDATION",
+            "displayName": "SSO Disable SSL Certificate Validation",
+            "value": "true",
+            "required": false
+        },
+        {
+            "description": "The name of the truststore file within the secret (e.g. truststore.jks)",
+            "name": "SSO_TRUSTSTORE",
+            "displayName": "SSO Truststore File",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the truststore and certificate (e.g. mykeystorepass)",
+            "name": "SSO_TRUSTSTORE_PASSWORD",
+            "displayName": "SSO Truststore Password",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
+            "name": "SSO_TRUSTSTORE_SECRET",
+            "displayName": "SSO Truststore Secret",
+            "value": "eap-app-secret",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of deployments that shoulds be exploded and enabled for SSO OpenIDConnect via auth-method",
+            "name": "SSO_OPENIDCONNECT_DEPLOYMENTS",
+            "displayName": "SSO OpenIDConnect Deployments",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of deployments that shoulds be exploded and enabled for SSO SAML via auth-method",
+            "name": "SSO_SAML_DEPLOYMENTS",
+            "displayName": "SSO SAML Deployments",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Database JNDI Name",
+            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/postgresql",
+            "name": "PG_JNDI",
+            "value": "java:jboss/datasources/PostgresqlDS",
+            "required": false
+        },
+        {
+            "displayName": "Database Name",
+            "description": "Database name",
+            "name": "PG_DATABASE",
+            "value": "root",
+            "required": true
+        },
+        {
+            "displayName": "Datasource Minimum Pool Size",
+            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+            "name": "PG_MIN_POOL_SIZE",
+            "required": false
+        },
+        {
+            "displayName": "Datasource Maximum Pool Size",
+            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+            "name": "PG_MAX_POOL_SIZE",
+            "required": false
+        },
+        {
+            "displayName": "Datasource Transaction Isolation",
+            "description": "Sets transaction-isolation for the configured datasource.",
+            "name": "PG_TX_ISOLATION",
+            "required": false
+        },
+        {
+            "displayName": "PostgreSQL Maximum number of connections",
+            "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
+            "name": "POSTGRESQL_MAX_CONNECTIONS",
+            "required": false
+        },
+        {
+            "displayName": "PostgreSQL Shared Buffers",
+            "description": "Configures how much memory is dedicated to PostgreSQL for caching data.",
+            "name": "POSTGRESQL_SHARED_BUFFERS",
+            "required": false
+        },
+        {
+            "displayName": "Database Username",
+            "description": "Database user name",
+            "name": "PG_USERNAME",
+            "from": "user[a-zA-Z0-9]{3}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Password",
+            "description": "Database user password",
+            "name": "PG_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database JNDI Name",
+            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mysql",
+            "name": "MS1_JNDI",
+            "value": "java:jboss/datasources/Mysql1DS",
+            "required": false
+        },
+        {
+            "displayName": "Database Name",
+            "description": "Database name",
+            "name": "MS1_DATABASE",
+            "value": "root",
+            "required": true
+        },
+        {
+            "displayName": "Datasource Minimum Pool Size",
+            "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+            "name": "MS1_MIN_POOL_SIZE",
+            "required": false
+        },
+        {
+            "displayName": "Datasource Maximum Pool Size",
+            "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+            "name": "MS1_MAX_POOL_SIZE",
+            "required": false
+        },
+        {
+            "displayName": "Datasource Transaction Isolation",
+            "description": "Sets transaction-isolation for the configured datasource.",
+            "name": "MS1_TX_ISOLATION",
+            "required": false
+        },
+        {
+            "displayName": "MySQL Lower Case Table Names",
+            "description": "Sets how the table names are stored and compared.",
+            "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
+            "required": false
+        },
+        {
+            "displayName": "MySQL Maximum number of connections",
+            "description": "The maximum permitted number of simultaneous client connections.",
+            "name": "MYSQL_MAX_CONNECTIONS",
+            "required": false
+        },
+        {
+            "displayName": "MySQL FullText Minimum Word Length",
+            "description": "The minimum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MIN_WORD_LEN",
+            "required": false
+        },
+        {
+            "displayName": "MySQL FullText Maximum Word Length",
+            "description": "The maximum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MAX_WORD_LEN",
+            "required": false
+        },
+        {
+            "displayName": "MySQL AIO",
+            "description": "Controls the innodb_use_native_aio setting value if the native AIO is broken.",
+            "name": "MYSQL_AIO",
+            "required": false
+        },
+        {
+            "displayName": "Database Username",
+            "description": "Database user name",
+            "name": "MS1_USERNAME",
+            "from": "user[a-zA-Z0-9]{3}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Password",
+            "description": "Database user password",
+            "name": "MS1_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Name",
+            "description": "Database name",
+            "name": "MS2_DATABASE",
+            "value": "root",
+            "required": true
+        },
+        {
+            "displayName": "Database Username",
+            "description": "Database user name",
+            "name": "MS2_USERNAME",
+            "from": "user[a-zA-Z0-9]{3}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Password",
+            "description": "Database user password",
+            "name": "MS2_PASSWORD",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        }
+    ],
+    "objects": [
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "name": "http",
+                        "port": 8080,
+                        "targetPort": "http"
+                    },
+                    {
+                        "name": "https",
+                        "port": 8443,
+                        "targetPort": "https"
+                    },
+                    {
+                        "name": "jdbc",
+                        "port": 31000,
+                        "targetPort": "jdbc"
+                    },
+                    {
+                        "name": "jdbcs",
+                        "port": 31443,
+                        "targetPort": "jdbcs"
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The data virtualization services."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 5432,
+                        "targetPort": 5432
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-postgresql",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The database server's port."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 3306,
+                        "targetPort": 3306
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The database server's port."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 3306,
+                        "targetPort": 3306
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql2"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql2",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The database server's port."
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-http",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Route for application's http (REST) service."
+                }
+            },
+            "spec": {
+                "host": "${HOSTNAME_HTTP}",
+                "port": {
+                    "targetPort": "http"
+                },
+                "to": {
+                    "name": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-https",
+            "metadata": {
+                "name": "secure-${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Route for application's https (REST) service."
+                }
+            },
+            "spec": {
+                "host": "${HOSTNAME_HTTPS}",
+                "port": {
+                    "targetPort": "https"
+                },
+                "to": {
+                    "name": "${APPLICATION_NAME}"
+                },
+                "tls": {
+                    "termination": "passthrough"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-jdbc",
+            "metadata": {
+                "name": "jdbc-${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Route for application's JPGC service."
+                }
+            },
+            "spec": {
+                "host": "${HOSTNAME_JPGC}",
+                "port": {
+                    "targetPort": "jdbcs"
+                },
+                "to": {
+                    "name": "${APPLICATION_NAME}"
+                },
+                "tls": {
+                    "termination": "passthrough"
+                }
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${SOURCE_REPOSITORY_URL}",
+                        "ref": "${SOURCE_REPOSITORY_REF}"
+                    },
+                    "contextDir": "${CONTEXT_DIR}"
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "forcePull": true,
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                            "name": "jboss-datavirt64-openshift:6.4.0"
+                        },
+                        "env": [
+                            {
+                                "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                "value": "extensions/*"
+                            },
+                            {
+                                "name": "VPG_DIRS",
+                                "value": "${VPG_DIRS}"
+                            }
+                        ]
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+                "triggers": [
+                    {
+                        "type": "GitHub",
+                        "github": {
+                            "secret": "${GITHUB_WEBHOOK_SECRET}"
+                        }
+                    },
+                    {
+                        "type": "Generic",
+                        "generic": {
+                            "secret": "${GENERIC_WEBHOOK_SECRET}"
+                        }
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {}
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "jboss-datagrid65-client-openshift:1.0"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "serviceAccountName": "${SERVICE_ACCOUNT_NAME}",
+                        "terminationGracePeriodSeconds": 60,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}",
+                                "image": "${APPLICATION_NAME}",
+                                "imagePullPolicy": "Always",
+                                "volumeMounts": [
+                                    {
+                                        "name": "configuration",
+                                        "mountPath": "/etc/datavirt-environment",
+                                        "readOnly": true
+                                    },
+                                    {
+                                        "name": "datavirt-keystore-volume",
+                                        "mountPath": "/etc/datavirt-secret-volume",
+                                        "readOnly": true
+                                    },
+                                    {
+                                        "name": "datavirt-jgroups-keystore-volume",
+                                        "mountPath": "/etc/jgroups-encrypt-secret-volume",
+                                        "readOnly": true
+                                    }
+                                ],
+                                "livenessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/bash",
+                                            "-c",
+                                            "/opt/eap/bin/livenessProbe.sh"
+                                        ]
+                                    }
+                                },
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/bash",
+                                            "-c",
+                                            "/opt/eap/bin/readinessProbe.sh"
+                                        ]
+                                    }
+                                },
+                                "ports": [
+                                    {
+                                        "name": "jolokia",
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "http",
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "https",
+                                        "containerPort": 8443,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "jdbc",
+                                        "containerPort": 31000,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "jdbcs",
+                                        "containerPort": 31443,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "ping",
+                                        "containerPort": 8888,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "DB_SERVICE_PREFIX_MAPPING",
+                                        "value": "${APPLICATION_NAME}-postgresql=PG,${APPLICATION_NAME}-mysql=MS1"
+                                    },
+                                    {
+                                        "name": "TX_DATABASE_PREFIX_MAPPING",
+                                        "value": "${APPLICATION_NAME}-postgresql=PG"
+                                    },
+                                    {
+                                        "name": "PG_JNDI",
+                                        "value": "${PG_JNDI}"
+                                    },
+                                    {
+                                        "name": "PG_USERNAME",
+                                        "value": "${PG_USERNAME}"
+                                    },
+                                    {
+                                        "name": "PG_PASSWORD",
+                                        "value": "${PG_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "PG_DATABASE",
+                                        "value": "${PG_DATABASE}"
+                                    },
+                                    {
+                                        "name": "TX_DATABASE_PREFIX_MAPPING",
+                                        "value": "${APPLICATION_NAME}-postgresql=PG"
+                                    },
+                                    {
+                                        "name": "PG_MIN_POOL_SIZE",
+                                        "value": "${PG_MIN_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "PG_MAX_POOL_SIZE",
+                                        "value": "${PG_MAX_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "PG_TX_ISOLATION",
+                                        "value": "${PG_TX_ISOLATION}"
+                                    }, 
+                                     {
+                                        "name": "MS1_JNDI",
+                                        "value": "${MS1_JNDI}"
+                                    },
+                                    {
+                                        "name": "MS1_USERNAME",
+                                        "value": "${MS1_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MS1_PASSWORD",
+                                        "value": "${MS1_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MS1_DATABASE",
+                                        "value": "${MS1_DATABASE}"
+                                    },
+                                    {
+                                        "name": "MS1_MIN_POOL_SIZE",
+                                        "value": "${MS1_MIN_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "MS1_MAX_POOL_SIZE",
+                                        "value": "${MS1_MAX_POOL_SIZE}"
+                                    },
+                                    {
+                                        "name": "MS1_TX_ISOLATION",
+                                        "value": "${MS1_TX_ISOLATION}"
+                                    },
+                                    {
+                                        "name": "OPENSHIFT_KUBE_PING_LABELS",
+                                        "value": "application=${APPLICATION_NAME}"
+                                    },
+                                    {
+                                        "name": "OPENSHIFT_KUBE_PING_NAMESPACE",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "metadata.namespace"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE_DIR",
+                                        "value": "/etc/datavirt-secret-volume"
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE",
+                                        "value": "${HTTPS_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "HTTPS_KEYSTORE_TYPE",
+                                        "value": "${HTTPS_KEYSTORE_TYPE}"
+                                    },
+                                    {
+                                        "name": "HTTPS_NAME",
+                                        "value": "${HTTPS_NAME}"
+                                    },
+                                    {
+                                        "name": "HTTPS_PASSWORD",
+                                        "value": "${HTTPS_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_SECRET",
+                                        "value": "${JGROUPS_ENCRYPT_SECRET}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE_DIR",
+                                        "value": "/etc/jgroups-encrypt-secret-volume"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_KEYSTORE",
+                                        "value": "${JGROUPS_ENCRYPT_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_NAME",
+                                        "value": "${JGROUPS_ENCRYPT_NAME}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_ENCRYPT_PASSWORD",
+                                        "value": "${JGROUPS_ENCRYPT_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "JGROUPS_CLUSTER_PASSWORD",
+                                        "value": "${JGROUPS_CLUSTER_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "AUTO_DEPLOY_EXPLODED",
+                                        "value": "${AUTO_DEPLOY_EXPLODED}"
+                                    },
+                                    {
+                                        "name": "TEIID_USERNAME",
+                                        "value": "${TEIID_USERNAME}"
+                                    },
+                                    {
+                                        "name": "TEIID_PASSWORD",
+                                        "value": "${TEIID_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MODESHAPE_USERNAME",
+                                        "value": "${MODESHAPE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MODESHAPE_PASSWORD",
+                                        "value": "${MODESHAPE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "ENV_FILES",
+                                        "value": "/etc/datavirt-environment/*"
+                                    },
+                                    {
+                                        "name": "DATAVIRT_TRANSPORT_KEYSTORE",
+                                        "value": "${HTTPS_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "DATAVIRT_TRANSPORT_KEYSTORE_TYPE",
+                                        "value": "${HTTPS_KEYSTORE_TYPE}"
+                                    },
+                                    {
+                                        "name": "DATAVIRT_TRANSPORT_KEY_ALIAS",
+                                        "value": "${HTTPS_NAME}"
+                                    },
+                                    {
+                                        "name": "DATAVIRT_TRANSPORT_KEYSTORE_PASSWORD",
+                                        "value": "${HTTPS_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_URL",
+                                        "value": "${SSO_URL}"
+                                    },
+                                    {
+                                        "name": "SSO_SERVICE_URL",
+                                        "value": "${SSO_SERVICE_URL}"
+                                    },
+                                    {
+                                        "name": "SSO_REALM",
+                                        "value": "${SSO_REALM}"
+                                    },
+                                    {
+                                        "name": "SSO_USERNAME",
+                                        "value": "${SSO_USERNAME}"
+                                    },
+                                    {
+                                        "name": "SSO_PASSWORD",
+                                        "value": "${SSO_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_PUBLIC_KEY",
+                                        "value": "${SSO_PUBLIC_KEY}"
+                                    },
+                                    {
+                                        "name": "SSO_BEARER_ONLY",
+                                        "value": "${SSO_BEARER_ONLY}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_SECRET",
+                                        "value": "${SSO_SAML_KEYSTORE_SECRET}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE",
+                                        "value": "${SSO_SAML_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_DIR",
+                                        "value": "/etc/sso-saml-secret-volume"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_CERTIFICATE_NAME",
+                                        "value": "${SSO_SAML_CERTIFICATE_NAME}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_PASSWORD",
+                                        "value": "${SSO_SAML_KEYSTORE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_SECRET",
+                                        "value": "${SSO_SECRET}"
+                                    },
+                                    {
+                                        "name": "SSO_ENABLE_CORS",
+                                        "value": "${SSO_ENABLE_CORS}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_LOGOUT_PAGE",
+                                        "value": "${SSO_SAML_LOGOUT_PAGE}"
+                                    },
+                                    {
+                                        "name": "SSO_DISABLE_SSL_CERTIFICATE_VALIDATION",
+                                        "value": "${SSO_DISABLE_SSL_CERTIFICATE_VALIDATION}"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE",
+                                        "value": "${SSO_TRUSTSTORE}"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE_DIR",
+                                        "value": "/etc/sso-secret-volume"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE_PASSWORD",
+                                        "value": "${SSO_TRUSTSTORE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_OPENIDCONNECT_DEPLOYMENTS",
+                                        "value": "${SSO_OPENIDCONNECT_DEPLOYMENTS}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_DEPLOYMENTS",
+                                        "value": "${SSO_SAML_DEPLOYMENTS}"
+                                    },
+                                    {
+                                        "name": "HOSTNAME_HTTP",
+                                        "value": "${HOSTNAME_HTTP}"
+                                    },
+                                    {
+                                        "name": "HOSTNAME_HTTPS",
+                                        "value": "${HOSTNAME_HTTPS}"
+                                    },
+                                    {
+                                        "name": "SCRIPT_DEBUG",
+                                        "value": "true"
+                                    }
+                                ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "configuration",
+                                "secret": {
+                                    "secretName": "${CONFIGURATION_NAME}"
+                                }
+                            },
+                            {
+                                "name": "datavirt-keystore-volume",
+                                "secret": {
+                                    "secretName": "${HTTPS_SECRET}"
+                                }
+                            },
+                            {
+                                "name": "datavirt-jgroups-keystore-volume",
+                                "secret": {
+                                    "secretName": "${JGROUPS_ENCRYPT_SECRET}"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-postgresql",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}-postgresql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "postgresql:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}-postgresql",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}-postgresql",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "terminationGracePeriodSeconds": 60,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}-postgresql",
+                                "image": "postgresql",
+                                "imagePullPolicy": "Always",
+                                "ports": [
+                                    {
+                                        "containerPort": 5432,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "POSTGRESQL_USER",
+                                        "value": "${PG_USERNAME}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_PASSWORD",
+                                        "value": "${PG_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_DATABASE",
+                                        "value": "${PG_DATABASE}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_MAX_CONNECTIONS",
+                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_MAX_PREPARED_TRANSACTIONS",
+                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                                    },
+                                    {
+                                        "name": "POSTGRESQL_SHARED_BUFFERS",
+                                        "value": "${POSTGRESQL_SHARED_BUFFERS}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}-mysql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "mysql:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}-mysql",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}-mysql",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "terminationGracePeriodSeconds": 60,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}-mysql",
+                                "image": "mysql",
+                                "imagePullPolicy": "Always",
+                                "ports": [
+                                    {
+                                        "containerPort": 3306,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${MS1_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${MS1_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "${MS1_DATABASE}"
+                                    },
+                                    {
+                                        "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
+                                        "value": "${MYSQL_LOWER_CASE_TABLE_NAMES}"
+                                    },
+                                    {
+                                        "name": "MYSQL_MAX_CONNECTIONS",
+                                        "value": "${MYSQL_MAX_CONNECTIONS}"
+                                    },
+                                    {
+                                        "name": "MYSQL_FT_MIN_WORD_LEN",
+                                        "value": "${MYSQL_FT_MIN_WORD_LEN}"
+                                    },
+                                    {
+                                        "name": "MYSQL_FT_MAX_WORD_LEN",
+                                        "value": "${MYSQL_FT_MAX_WORD_LEN}"
+                                    },
+                                    {
+                                        "name": "MYSQL_AIO",
+                                        "value": "${MYSQL_AIO}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql2",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}-mysql2"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "mysql:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql2"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}-mysql",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}-mysql2",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "terminationGracePeriodSeconds": 60,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}-mysql2",
+                                "image": "mysql",
+                                "imagePullPolicy": "Always",
+                                "ports": [
+                                    {
+                                        "containerPort": 3306,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${MS2_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${MS2_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "${MS2_DATABASE}"
+                                    },
+                                    {
+                                        "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
+                                        "value": "${MYSQL_LOWER_CASE_TABLE_NAMES}"
+                                    },
+                                    {
+                                        "name": "MYSQL_MAX_CONNECTIONS",
+                                        "value": "${MYSQL_MAX_CONNECTIONS}"
+                                    },
+                                    {
+                                        "name": "MYSQL_FT_MIN_WORD_LEN",
+                                        "value": "${MYSQL_FT_MIN_WORD_LEN}"
+                                    },
+                                    {
+                                        "name": "MYSQL_FT_MAX_WORD_LEN",
+                                        "value": "${MYSQL_FT_MAX_WORD_LEN}"
+                                    },
+                                    {
+                                        "name": "MYSQL_AIO",
+                                        "value": "${MYSQL_AIO}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
