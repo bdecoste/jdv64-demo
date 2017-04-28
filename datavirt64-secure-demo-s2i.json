@@ -782,15 +782,6 @@
                         "imageChange": {}
                     },
                     {
-                        "type": "ImageChange",
-                        "imageChange": {
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "name": "jboss-datagrid65-client-openshift:1.0"
-                            }
-                        }
-                    },
-                    {
                         "type": "ConfigChange"
                     }
                 ]
@@ -862,7 +853,12 @@
                                         "name": "datavirt-jgroups-keystore-volume",
                                         "mountPath": "/etc/jgroups-encrypt-secret-volume",
                                         "readOnly": true
-                                    }
+                                    },
+                                    {
+                                        "name": "datasources-volume",
+                                        "mountPath": "/etc/jdv-extensions",
+                                        "readOnly": true
+                                    }    
                                 ],
                                 "livenessProbe": {
                                     "exec": {
@@ -984,6 +980,18 @@
                                         "value": "${MS1_TX_ISOLATION}"
                                     },
                                     {
+                                        "name": "MS2_USER",
+                                        "value": "${MS2_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MS2_PASSWORD",
+                                        "value": "${MS2_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MS2_DATABASE",
+                                        "value": "${MS2_DATABASE}"
+                                    },
+                                    {
                                         "name": "OPENSHIFT_KUBE_PING_LABELS",
                                         "value": "application=${APPLICATION_NAME}"
                                     },
@@ -1061,7 +1069,7 @@
                                     },
                                     {
                                         "name": "ENV_FILES",
-                                        "value": "/etc/datavirt-environment/*"
+                                        "value": "/etc/datavirt-environment/*,/etc/jdv-extensions/datasources.properties"
                                     },
                                     {
                                         "name": "DATAVIRT_TRANSPORT_KEYSTORE",
@@ -1195,6 +1203,12 @@
                                 "name": "datavirt-jgroups-keystore-volume",
                                 "secret": {
                                     "secretName": "${JGROUPS_ENCRYPT_SECRET}"
+                                }
+                            },
+                            {
+                                "name": "datasources-volume",
+                                "secret": {
+                                    "secretName": "datasources-secret"
                                 }
                             }
                         ]
